@@ -1,0 +1,101 @@
+
+<!doctype html>
+
+<html>
+<head>
+  <meta name="viewport" content="width=device-width, minimum-scale=1.0, initial-scale=1.0, user-scalable=yes">
+  <meta name="theme-color" content="#4F7DC9">
+  <meta charset="UTF-8">
+  <title>Hardening a un Router Peplink</title>
+  <link rel="stylesheet" href="//fonts.googleapis.com/css?family=Source+Code+Pro:400|Roboto:400,300,400italic,500,700|Roboto+Mono">
+  <link rel="stylesheet" href="//fonts.googleapis.com/icon?family=Material+Icons">
+  <link rel="stylesheet" href="https://storage.googleapis.com/claat-public/codelab-elements.css">
+  <style>
+    .success {
+      color: #1e8e3e;
+    }
+    .error {
+      color: red;
+    }
+  </style>
+</head>
+<body>
+  <google-codelab-analytics gaid="UA-49880327-14"></google-codelab-analytics>
+  <google-codelab codelab-gaid=""
+                  id="hardening"
+                  title="Hardening a un Router Peplink"
+                  environment="web"
+                  feedback-link="">
+    
+      <google-codelab-step label="Introducción" duration="40">
+        <p class="image-container"><img alt="portada" src="img\\8dc72850ed656164.jpg"></p>
+<p>Se realizará un hardening de un router, en este caso será el router Balance 710 de Peplink. Se utilizará la demo interfaz web proporcionada por el vendedor del producto para este hardening siguiendo el artículo dado en la tarea para el hardening del mismo.</p>
+<p>Este router es un modelo de gama alta con hasta 7 puertos WAN Ethernet y un controlador AP.</p>
+
+
+      </google-codelab-step>
+    
+      <google-codelab-step label="Hardening del Router Balance 710" duration="16">
+        <p>Entramos en con el usuario y la contraseña dada por el fabricante e ir siguiendo punto por punto el artículo.</p>
+<h2 is-upgraded>WPS</h2>
+<p>El artículo indica que tener WPS es algo malo para la seguridad de nuestro router. En este caso este router no tiene opción para desactivar WPS ya que no lo incluye como tal. He investigado en el panel de control del router en el apartado de AP. <img alt="wps" src="img\\13fbce04a7b3ea2f.png"></p>
+<h2 is-upgraded>Contraseñas por defecto</h2>
+<p>Una de las cosas más importante es no tener puestas las contraseñas por defecto en el router.</p>
+<p>Para ello hemos ido a la pestaña system del router y cambiar la contraseña y el usuario de administración. En este caso la demo tiene un usuario y una contraseña distintas a las por defecto tanto para el usuario admin que suele ser admin-admin o para el usaurio que suele ser user-user. <img alt="userpass" src="img\\961b479f47dbe32f.png"></p>
+<h2 is-upgraded>Administración Local</h2>
+<p>En este punto el artículo nos indica que debemos siempre permitir las conexiones https.</p>
+<p>El router Balance 710 viene por defecto activado tanto para HTTP como HTTPS, en este punto debemos decidir entre seguridad y funcionalidad.</p>
+<p>Obviamente si permitimos además del HTTPS el HTTP, estamos permitiendo que los usuarios se conecten a páginas posiblemente maliciosas pero si solo permitimos HTTPS, estamos limitando las páginas a las que podremos acceder.</p>
+<p>Vamos a permitir en este caso solo las conexiones HTTPS, en este caso también lo hacemos desde la pestaña System. Bajamos hasta donde indica la seguridad y cambiamos de HTTP/HTTPS a solo HTTPS. <img alt="https" src="img\\c7086bd3e0d8225c.png"></p>
+<h3 is-upgraded>Puerto para la interfaz Web</h3>
+<p>Al haber hecho la configuración anterior, el router automáticamente selecciona solo la posibilidad de conectarse via HTTPS por el puerto 443. <img alt="port443" src="img\\c7086bd3e0d8225c.png"></p>
+<h3 is-upgraded>LAN Access</h3>
+<p>Vamos a asegurarnos de que solo el administrador que se encuentra en la LAN sea el que pueda acceder a esta interfaz web cambiando el tipo de acceso a LAN. También configurable en la pestaña System. <img alt="lanonly" src="img\\b11a14cfe21c508.png"></p>
+<h3 is-upgraded>LAN Connection Access</h3>
+<p>Ahora solo permitiremos el acceso desde la VLAN del trabajo. Desde la misma pestaña de system bajamos hasta encontrar la siguiente configuración y seleccionamos la VLAN. <img alt="lanaccess" src="img\\df9215abc1454472.png"></p>
+<h3 is-upgraded>Log de inicio de sesión</h3>
+<p>Este router permite crear un log de inicio de sesión. Para ello debemos ir a la pestaña Event Log dentro de System y activar esta opción colocando la vlan donde se encuentra el servidor y la dirección IP.</p>
+<p class="image-container"><img alt="logsession" src="img\\b11663e5f4438e0d.png"></p>
+<h3 is-upgraded>Authentication timeout y session timeout</h3>
+<p>Vamos a comprobar la configuración de tiempo de espera en el que el router espera que un usuario incluya una contraseña cuando se quiere acceder a un servicio que lo pida.</p>
+<p>Viene configurado por defecto en 3s y lo dejaremos así, lo importante a cambiar es el tiempo de sesión en la interfaz web de 5 horas que viene por defecto a 10 minutos. <img alt="timeout" src="img\\1266fbd94db36cbd.png"></p>
+<h2 is-upgraded>Administración Remota</h2>
+<p>Otro punto importante en el momento de hacer hardening es en el acceso remoto a la interfaz web.</p>
+<p>Habiendo hecho el poder entrar por https en la administración local ya estamos haciendo un punto importante de hardening para la administración remota.</p>
+<h3 is-upgraded>Acceso Remoto</h3>
+<p>En este router viene por defecto habilitado el acceso remoto. Para deshabilitarlo vamos a la pestaña de Advanced y en el menú lateral seleccionamos la opción de Remote User Access. Lo desactivamos. <img alt="remoteuser" src="img\\8924386662a5fa4a.png"></p>
+<h3 is-upgraded>Permitir solo las DIR IP de la subnet</h3>
+<p>Si volvemos a la pestaña de System y bajamos hasta la opción que vemos en al imagen, podremos modificar que direcciones IP de la subnet queremos que se conecten.</p>
+<p>Si por defecto vienen incluidas todas las posibles, las limpiamos y lo configuramos como lo necesitemos. <img alt="ipwan" src="img\\45e8d46f921e871f.png"></p>
+<h2 is-upgraded>Asegurar DNS</h2>
+<p>En los router Peplink como este a partir de la versión 8.2 (El nuestro es 8.3) viene por defecto activada DNS over HTTP, la dejamos como está. <img alt="dnssecure" src="img\\a12d20b40f133a97.png"></p>
+<h2 is-upgraded>Firewall</h2>
+<p>El artículo indica que lo mejor es tener el acceso externo a nuestra red bloqueado. He prohibido cualquier acceso desde la WAN a cualquier IP de la red.</p>
+<p>Para hacer esto nos vamos a la pestaña llamada Advanced y en Firewall access rules en el panel izquierdo encontraremos la posibilidad de crear las reglas. <img alt="inbound" src="img\\40ccce0ddf03a673.png"></p>
+<h2 is-upgraded>Eliminar redes WiFi Mesh</h2>
+<p>A veces los routers que permiten esta opción crean redes WiFi ocultas con un cifrado débil. Por lo tanto si no vamos a necesitar dicha opción, vamos a eliminarlas.</p>
+<p>En la demo vienen creadas dos redes Wifi Mesh a 2.4 en la pestaña AP y clicando en el panel lateral en la opción Wireless Mesh.</p>
+<p>Como no sé si al eliminarlas puedo estropear mi demo, no las he eliminado.</p>
+<h2 is-upgraded>WPA2 y WPA3</h2>
+<p>Este router permite las opciones tanto WPA2 Personal y Enterprise como WPA y WPA3.</p>
+<p>Seleccionamos que queremos que nuestro SSID tenga WPA3 Enterprise ya que es la más segura de todas.</p>
+<p class="image-container"><img alt="wpa3" src="img\\13fbce04a7b3ea2f.png"></p>
+<h2 is-upgraded>Redes para invitados</h2>
+<p>Podemos crear una red para invitados para que los clientes o las personas que entren en nuestro hogar no accedan directamente a nuestro SSID.</p>
+<p>En este caso he creado una red para invitados con WPA 3 y autenticación con RADIUS. Si queremos podemos añadirle reglas de Firewall. <img alt="invitado" src="img\\e9b59bf49067e191.png"></p>
+<h2 is-upgraded>Email notificación</h2>
+<p>Podemos hacer que nuestro router nos envie notificaciones a nuestro correo electrónico. Esto se hace desde la pestaña system, clicando en el panel lateral en la opción Email notification y poniendo la información de nuestro correo al que se enviará. <img alt="email" src="img\\18c81f3040aefa7f.png"></p>
+
+
+      </google-codelab-step>
+    
+  </google-codelab>
+
+  <script src="https://storage.googleapis.com/claat-public/native-shim.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/custom-elements.min.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/prettify.js"></script>
+  <script src="https://storage.googleapis.com/claat-public/codelab-elements.js"></script>
+  <script src="//support.google.com/inapp/api.js"></script>
+
+</body>
+</html>
